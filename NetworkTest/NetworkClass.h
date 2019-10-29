@@ -1,27 +1,23 @@
 #pragma once
 
+#include <SFML/Network.hpp>
+
 #include <string>
 #include <iostream>
 #include <vector>
 
-#include <SFML/Network.hpp>
-//test game
-#include <SFML/Graphics.hpp>
-
-class Network
+class NetworkClass
 {
 public:
-	Network();
-	~Network();
+	NetworkClass();
+	~NetworkClass();
 
-	void run();
+	bool Initialise();
 
-	//connection mode
-	char connetion, mode;
+	sf::Vector2f Perdiction(sf::Vector2f velocity, sf::Int32 serverTime, sf::Vector2f position);
 
-	//test string
-	std::string test = "Connected to the: ";
-
+public:
+	char connection, mode;
 	//recieve buffer
 	char buffer[200];
 	size_t bufferSize;
@@ -77,8 +73,6 @@ public:
 
 	int count = 0;
 
-	sf::Vector2f perdiction(sf::Vector2f, sf::Int32, sf::Vector2f);
-
 	// vector for time and position
 	std::vector <sf::Vector2f> positionP1;
 	std::vector <sf::Int32> sTimeP1;
@@ -107,10 +101,8 @@ public:
 
 	//final positions actually applied
 	sf::Vector2f fP1Position, fP2Position;
-	
-	//display text
-	sf::Font font;
-	sf::Text banner;
+
+	std::string checkString = "Connected to ";
 
 };
 

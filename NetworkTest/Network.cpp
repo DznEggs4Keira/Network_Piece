@@ -250,7 +250,7 @@ void Network::run()
 			}
 
 			//this is where the time sync starts.
-			/*client will send a packet storing the identifier type and its client time*/
+			//client will send a packet storing the identifier type and its client time
 			//STEP 1 - time sync
 			//send current time of client
 			//to loop it and check every 3seconds
@@ -354,7 +354,7 @@ void Network::run()
 
 								//for p1
 								fP1Position = (perdiction(velocityP1, sTimeP1.back(), positionP1.back()));
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//________________________________________________________________________________________________________________________
 
 								sizeT2 = sTimeP2.size();
 								sizeD2 = positionP2.size();
