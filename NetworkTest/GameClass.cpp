@@ -36,15 +36,3 @@ void GameClass::HandleInput()
 {
 
 }
-
-void GameClass::Draw(sf::RenderWindow mWindow)
-{
-	//display text
-	mWindow.draw(banner);
-
-	mWindow.draw(rect1);
-	mWindow.draw(rect2);
-
-	mWindow.display();
-	mWindow.clear();
-}

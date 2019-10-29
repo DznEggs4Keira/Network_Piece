@@ -60,7 +60,7 @@ void SystemClass::Run()
 	std::cout << pNetwork->buffer << std::endl;
 
 	//renders the window
-	sf::RenderWindow mWindow(sf::VideoMode(640, 480, 32), "Network Test");
+	sf::RenderWindow mWindow(sf::VideoMode(640, 480, 32), "Network Piece");
 
 	//need this to make sure it recieves packets
 	pNetwork->testSocket.setBlocking(false);
@@ -323,5 +323,15 @@ void SystemClass::Run()
 			}
 
 		}
+		//display text
+		mWindow.draw(pGame->banner);
+
+		mWindow.draw(pGame->rect1);
+		mWindow.draw(pGame->rect2);
+
+		mWindow.display();
+		mWindow.clear();
 	}
+
+	system("pause");
 }

@@ -10,7 +10,7 @@ public:
 
 	bool Initialise();
 	void HandleInput();
-	void Draw(sf::RenderWindow);
+	void Draw();
 
 public: 
 	//game objects
