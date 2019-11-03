@@ -8,6 +8,8 @@ GameClass::~GameClass()
 {
 }
 
+#pragma region Initialise
+
 bool GameClass::Initialise()
 {
 	//Sets up the game stuff
@@ -32,7 +34,76 @@ bool GameClass::Initialise()
 	return true;
 }
 
+#pragma endregion
+
+#pragma region Getter/Setter
+
+sf::Vector2f GameClass::GetR1() { return rect1.getPosition(); }
+void GameClass::SetR1(sf::Vector2f pr1) { rect1.setPosition(pr1); }
+
+sf::Vector2f GameClass::GetR2() { return rect2.getPosition(); }
+void GameClass::SetR2(sf::Vector2f pr2) { rect2.setPosition(pr2); }
+
+#pragma endregion
+
+#pragma region HandleInput
+
 void GameClass::HandleInput()
 {
+	//handle input of the player 1
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+	{
+		//move player 1
+		rect1.move(0.09f, 0.0f);
 
+		//attempt mini collision detection
+		//for player 2
+		if (rect2.getGlobalBounds().intersects(rect1.getGlobalBounds()))
+			rect2.move(0.05f, 0.0f);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	{
+		//move player 1
+		rect1.move(-0.09f, 0.0f);
+
+		//attempt mini collision detection
+		//for player 2
+		if (rect2.getGlobalBounds().intersects(rect1.getGlobalBounds()))
+			rect2.move(-0.05f, 0.0f);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+	{
+		//move player 1
+		rect1.move(0.0f, -0.09f);
+
+		//attempt mini collision detection
+		//for player 2
+		if (rect2.getGlobalBounds().intersects(rect1.getGlobalBounds()))
+			rect2.move(0.0f, -0.05f);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	{
+		//move player 1
+		rect1.move(0.0f, 0.09f);
+
+		//attempt mini collision detection
+		//for player 2
+		if (rect2.getGlobalBounds().intersects(rect1.getGlobalBounds()))
+			rect2.move(0.0f, 0.05f);
+	}
 }
+
+#pragma endregion
+
+#pragma region Render
+
+void GameClass::Draw(sf::RenderWindow &mWindow)
+{
+	//display text
+	mWindow.draw(banner);
+
+	mWindow.draw(rect1);
+	mWindow.draw(rect2);
+}
+
+#pragma endregion

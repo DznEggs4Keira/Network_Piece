@@ -6,15 +6,60 @@
 #include <iostream>
 #include <vector>
 
+#include "GameClass.h"
+
 class NetworkClass
 {
 public:
 	NetworkClass();
 	~NetworkClass();
-
+	//Init
 	bool Initialise();
 
+
+	//Calc
 	sf::Vector2f Perdiction(sf::Vector2f velocity, sf::Int32 serverTime, sf::Vector2f position);
+
+	//getter setters
+	sf::Vector2f GetP1(); void SetP1(sf::Vector2f);
+
+	sf::Vector2f GetP2(); void SetP2(sf::Vector2f);
+
+	sf::Vector2f GetNP1(); void SetNP1(sf::Vector2f);
+
+	sf::Vector2f GetNP2(); void SetNP2(sf::Vector2f);
+
+	sf::Vector2f GetFP1(); void SetFP1(sf::Vector2f);
+
+	sf::Vector2f GetFP2(); void SetFP2(sf::Vector2f);
+
+	//Confirmation on connection String
+	void ConfirmConnect();
+
+	//check what connection, server or client
+	char GetConnection();
+
+	//Packets moving across the network
+	//Recieve Time Pack
+	//Send Time Pack
+	//Send Pos Pack
+
+	//Server Side
+	void ServerSide(GameClass* pGame, bool bUpdate);
+
+	//Client Side
+	void ClientSide(GameClass* pGame);
+
+
+private:
+	//positions of the game players --- needed for sending positions
+	//server
+	sf::Vector2f p1Position, p2Position;
+	//client
+	sf::Vector2f nP1Position, nP2Position;
+
+	//final positions actually applied
+	sf::Vector2f fP1Position, fP2Position;
 
 public:
 	char connection, mode;
@@ -65,12 +110,6 @@ public:
 	sf::Int32 AvgLag;
 	sf::Int32 DeltaTime;
 
-	//positions of the game players --- needed for sending positions
-	//server
-	sf::Vector2f p1Position, p2Position;
-	//client
-	sf::Vector2f nP1Position, nP2Position;
-
 	int count = 0;
 
 	// vector for time and position
@@ -97,12 +136,12 @@ public:
 	sf::Vector2f velocityP2;
 
 	//T from aT + b of prediction
-	sf::Int32 perdictionTime;;
-
-	//final positions actually applied
-	sf::Vector2f fP1Position, fP2Position;
+	sf::Int32 perdictionTime;
 
 	std::string checkString = "Connected to ";
 
+
+	//new variables
+	float updatePosSent;
 };
 
