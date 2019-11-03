@@ -26,6 +26,8 @@ bool GameClass::Initialise()
 	//Ball
 	ball.setRadius(30.0f);
 	ball.setFillColor(sf::Color::Magenta);
+	ball.setOutlineThickness(5.0f);
+	ball.setOutlineColor(sf::Color::Color(245, 152, 66));
 	ball.setPosition(320.0f, 240.0f);
 
 	//Font
@@ -35,6 +37,11 @@ bool GameClass::Initialise()
 	}
 
 	banner.setFont(font);
+	banner.setPosition(sf::Vector2f(50.0f, 0.0f));
+	banner.setFillColor(sf::Color::Black);
+	banner.setStyle(sf::Text::Bold);
+	banner.setOutlineThickness(2.0f);
+	banner.setOutlineColor(sf::Color::White);
 
 	//Sprite
 	if (!playerTex.loadFromFile("data/Idle (1).png"))
