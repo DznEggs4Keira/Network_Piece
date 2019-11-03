@@ -57,7 +57,6 @@ void SystemClass::Run()
 
 	//renders the window
 	sf::RenderWindow mWindow(sf::VideoMode(640, 480, 32), "Network Piece");
-
 	//Prepare the socket to recieve the packets
 	pNetwork->testSocket.setBlocking(false);
 
@@ -108,7 +107,7 @@ void SystemClass::Run()
 		mWindow.display();
 
 		//Clear the window for the next frame
-		mWindow.clear();
+		mWindow.clear(sf::Color::Green);
 	}
 
 	//pause the application on exit from window

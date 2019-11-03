@@ -13,12 +13,9 @@ class NetworkClass
 public:
 	NetworkClass();
 	~NetworkClass();
+
 	//Init
 	bool Initialise();
-
-
-	//Calc
-	sf::Vector2f Perdiction(sf::Vector2f velocity, sf::Int32 serverTime, sf::Vector2f position);
 
 	//getter setters
 	sf::Vector2f GetP1(); void SetP1(sf::Vector2f);
@@ -33,16 +30,10 @@ public:
 
 	sf::Vector2f GetFP2(); void SetFP2(sf::Vector2f);
 
+	//check what connection, server or client
+	char GetConnection() { return connection; }
 	//Confirmation on connection String
 	void ConfirmConnect();
-
-	//check what connection, server or client
-	char GetConnection();
-
-	//Packets moving across the network
-	//Recieve Time Pack
-	//Send Time Pack
-	//Send Pos Pack
 
 	//Server Side
 	void ServerSide(GameClass* pGame, bool bUpdate);
@@ -50,6 +41,26 @@ public:
 	//Client Side
 	void ClientSide(GameClass* pGame);
 
+private:
+	//output the string to show Client/Server Time
+	void SetString(GameClass* pGame);
+
+	//Server Side
+		//Time Sync
+	//Recieve Time Pack
+	void Step2TimeSync();
+	void SendPosition(GameClass* pGame);
+
+	//Client Side
+		//Time Sync
+	//Send Time Pack
+	void Step1TimeSync();
+	//Recieve Time Pack
+	void Step3TimeSync(GameClass* pGame);
+	void RecievePosition(GameClass* pGame);
+
+	//Calc
+	sf::Vector2f Perdiction(sf::Vector2f velocity, sf::Int32 serverTime, sf::Vector2f position);
 
 private:
 	//positions of the game players --- needed for sending positions
@@ -61,14 +72,10 @@ private:
 	//final positions actually applied
 	sf::Vector2f fP1Position, fP2Position;
 
-public:
 	char connection, mode;
 	//recieve buffer
 	char buffer[200];
 	size_t bufferSize;
-
-	//socket
-	sf::TcpSocket testSocket;
 
 	//for server --- listener is the socket for the server and test socket is the socket the client will connect to
 	//for a successful connection, listener needs to accept the test socket.
@@ -140,8 +147,11 @@ public:
 
 	std::string checkString = "Connected to ";
 
-
 	//new variables
 	float updatePosSent;
+
+public:
+	//socket
+	sf::TcpSocket testSocket;
 };
 

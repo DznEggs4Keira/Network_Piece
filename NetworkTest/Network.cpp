@@ -90,15 +90,15 @@ void Network::run()
 	//if i send or recieve stop.. it should come out of the loop above
 
 	//Sets up the game stuff --- game stuff will stay here.....or not?... hmmm
-	sf::RectangleShape rect1, rect2;
+	sf::RectangleShape blueRect, redRect;
 
-	rect1.setSize(sf::Vector2f(100.0f, 100.0f));
-	rect1.setFillColor(sf::Color::Red);
-	rect1.setPosition(540.0f, 380.0f);
+	blueRect.setSize(sf::Vector2f(100.0f, 100.0f));
+	blueRect.setFillColor(sf::Color::Red);
+	blueRect.setPosition(540.0f, 380.0f);
 
-	rect2.setSize(sf::Vector2f(100.0f, 100.0f));
-	rect2.setFillColor(sf::Color::Blue);
-	rect2.setPosition(50.0f, 100.0f);
+	redRect.setSize(sf::Vector2f(100.0f, 100.0f));
+	redRect.setFillColor(sf::Color::Blue);
+	redRect.setPosition(50.0f, 100.0f);
 
 	if (!font.loadFromFile("arial.ttf"))
 	{
@@ -144,8 +144,8 @@ void Network::run()
 			}
 
 			//save the position vectors into the vectors to send
-			p1Position = rect1.getPosition();
-			p2Position = rect2.getPosition();
+			p1Position = blueRect.getPosition();
+			p2Position = redRect.getPosition();
 
 			//handle input and collision for player 1 and 2
 			if (update)
@@ -153,25 +153,25 @@ void Network::run()
 				//handle input of the player 1
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 				{
-					rect1.move(0.09f, 0.0f);
+					blueRect.move(0.09f, 0.0f);
 				}
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 				{
-					rect1.move(-0.09f, 0.0f);
+					blueRect.move(-0.09f, 0.0f);
 				}
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 				{
-					rect1.move(0.0f, -0.09f);
+					blueRect.move(0.0f, -0.09f);
 				}
 				if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 				{
-					rect1.move(0.0f, 0.09f);
+					blueRect.move(0.0f, 0.09f);
 				}
 
 				//attempt mini collision detection
 				//for player 2
-				if (rect2.getGlobalBounds().intersects(rect1.getGlobalBounds()))
-					rect2.move(0.05f, 0.0f); //right
+				if (redRect.getGlobalBounds().intersects(blueRect.getGlobalBounds()))
+					redRect.move(0.05f, 0.0f); //right
 			}
 
 			//first the server will always recieve time stamp from client
@@ -210,11 +210,11 @@ void Network::run()
 			float updatePosSent = posSentTime.getElapsedTime().asMilliseconds();
 			if (updatePosSent >= 20)
 			{
-				if ((p1Position != rect1.getPosition()) || (p2Position != rect2.getPosition()))
+				if ((p1Position != blueRect.getPosition()) || (p2Position != redRect.getPosition()))
 				{
 					//position identifier << latest serverTime << position information
-					testPacket << PosPack << serverTime << rect1.getPosition().x << rect1.getPosition().y
-						<< rect2.getPosition().x << rect2.getPosition().y;
+					testPacket << PosPack << serverTime << blueRect.getPosition().x << blueRect.getPosition().y
+						<< redRect.getPosition().x << redRect.getPosition().y;
 					sf::Socket::Status status = testSocket.send(testPacket);
 
 					if (status == sf::Socket::Done)
@@ -383,8 +383,8 @@ void Network::run()
 								std::cout << "Final applied position P2: " << fP2Position.x << ", " << fP1Position.y << std::endl;
 								
 								//place float value in here --- move makes it dissappear.
-								rect1.setPosition(fP1Position);
-								rect2.setPosition(fP2Position);
+								blueRect.setPosition(fP1Position);
+								redRect.setPosition(fP2Position);
 							}
 						}
 					}
@@ -397,8 +397,8 @@ void Network::run()
 		//display text
 		mWindow.draw(banner);
 
-		mWindow.draw(rect1);
-		mWindow.draw(rect2);
+		mWindow.draw(blueRect);
+		mWindow.draw(redRect);
 
 		mWindow.display();
 		mWindow.clear();

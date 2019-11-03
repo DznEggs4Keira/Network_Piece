@@ -13,15 +13,26 @@ public:
 	void Draw(sf::RenderWindow &mWindow);
 
 	//getter setters
-	sf::Vector2f GetR1();
-	void SetR1(sf::Vector2f);
+	sf::Vector2f GetPlayerPos();
+	void SetPlayerPos(sf::Vector2f);
 
-	sf::Vector2f GetR2();
-	void SetR2(sf::Vector2f);
+	sf::Vector2f GetBallPos();
+	void SetBallPos(sf::Vector2f);
+
+private:
+	void BallMovement(int state);
 
 private:
 	//game objects
-	sf::RectangleShape rect1, rect2;
+	sf::RectangleShape blueRect, redRect;
+
+	//ball
+	sf::CircleShape ball;
+
+	//player
+	sf::Sprite player;
+	sf::Texture playerTex;
+
 
 public:
 	//display text
