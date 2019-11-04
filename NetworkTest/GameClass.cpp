@@ -43,18 +43,56 @@ bool GameClass::Initialise()
 	banner.setOutlineThickness(2.0f);
 	banner.setOutlineColor(sf::Color::White);
 
+	//Score boards
+	Score.setFont(font);
+	Score.setPosition(sf::Vector2f(50.0f, 20.0f));
+	Score.setFillColor(sf::Color::Black);
+	Score.setStyle(sf::Text::Bold);
+	Score.setOutlineThickness(2.0f);
+	Score.setOutlineColor(sf::Color::White);
+
+	Score.setString(scoreNum + std::to_string(sNum));
+
 	//Sprite
-	if (!playerTex.loadFromFile("data/Idle (1).png"))
+	if (!playerTex.loadFromFile("data/FlatBoy.png"))
 	{
 		throw std::runtime_error("Couldn't load from file");
 	}
 
+	//set up the tex rect of the first frame of each type of animation
+	idleRect = { 0, 0, 615, 564 };
+	runRect = { 0, 564, 615, 564 };
+	attackRect = { 0, 1128, 615, 564 };
+
 	player.setTexture(playerTex);
-	player.setOrigin(sf::Vector2f(playerTex.getSize().x / 2, playerTex.getSize().y / 2));
+	player.setTextureRect(idleRect);
+
+	//player.setOrigin(sf::Vector2f(playerTex.getSize().x / 2, playerTex.getSize().y / 2)); --- Sprite dissapears
 	player.setScale(sf::Vector2f(0.5f, 0.5f));
 	player.setPosition(320.0f, 280.0f);
 
+	Sound();
+
 	return true;
+}
+
+void GameClass::Sound()
+{
+	if (!BgMusic.openFromFile("data/Background.wav"))
+	{
+		throw std::runtime_error("Couldn't open from file");
+	}
+
+	BgMusic.setLoop(true);
+	BgMusic.setVolume(50);
+	BgMusic.play();
+
+	if (!buffer.loadFromFile("data/ballHit.wav"))
+	{
+		throw std::runtime_error("Couldn't load from file");
+	}
+
+	hitFX.setBuffer(buffer);
 }
 
 #pragma endregion
@@ -67,8 +105,6 @@ void GameClass::SetPlayerPos(sf::Vector2f pr1) { player.setPosition(pr1); }
 sf::Vector2f GameClass::GetBallPos() { return ball.getPosition(); }
 void GameClass::SetBallPos(sf::Vector2f pr2) { ball.setPosition(pr2); }
 
-
-
 #pragma endregion
 
 #pragma region HandleInput
@@ -80,48 +116,56 @@ void GameClass::HandleInput()
 	//handle input of the player 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 	{
+		state = 1;
+		AnimationHandler(state);
+
 		//move player 
 		player.move(0.0f, -0.09f);
-
-		state = 1;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
+		state = 2;
+		AnimationHandler(state);
+
 		//move player 
 		player.move(-0.09f, 0.0f);
-
-		state = 2;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
+		state = 3;
+		AnimationHandler(state);
+
 		//move player 
 		player.move(0.0f, 0.09f);
-
-		state = 3;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
+		state = 4;
+		AnimationHandler(state);
+
 		//move player 
 		player.move(0.09f, 0.0f);
-
-		state = 4;
 	}
 
 	//Hit the ball
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 	{
 		//run the attack animation
+		hitFX.play();
+		AnimationHandler(5);
+
 		BallMovement(state);
+
 	}
 }
 
 void GameClass::BallMovement(int state)
 {
 	//ball movement
-	float force = 0.05f;
+	float force = 0.5f;
 
 	//ball will move only if collision
 	if (ball.getGlobalBounds().intersects(player.getGlobalBounds()))
@@ -150,6 +194,69 @@ void GameClass::BallMovement(int state)
 			}
 		}
 	}
+
+	if (ball.getGlobalBounds().intersects(blueRect.getGlobalBounds()))
+	{
+		sNum += 1;
+	}
+
+	//update the score
+	Score.setString(scoreNum + std::to_string(sNum));
+}
+
+void GameClass::AnimationHandler(int state)
+{
+	sf::Clock timer;
+
+	if (timer.getElapsedTime().asSeconds() > 1.0f)
+	{
+		//IDLE
+		if (state == 0)
+		{
+			if (idleRect.left == 9924)
+			{
+				idleRect.left = 0;
+			}
+			else
+			{
+				idleRect.left += 615;
+			}
+
+			player.setTextureRect(idleRect);
+		}
+
+		//Attack
+		else if (state == 5)
+		{
+			if (attackRect.left == 9924)
+			{
+				attackRect.left = 0;
+			}
+			else
+			{
+				attackRect.left += 615;
+			}
+
+			player.setTextureRect(attackRect);
+		}
+
+		//Running
+		else
+		{
+			if (runRect.left == 9924)
+			{
+				runRect.left = 0;
+			}
+			else
+			{
+				runRect.left += 615;
+			}
+
+			player.setTextureRect(runRect);
+		}
+
+		timer.restart();
+	}
 }
 
 #pragma endregion
@@ -165,6 +272,7 @@ void GameClass::Draw(sf::RenderWindow &mWindow)
 
 	//display text
 	mWindow.draw(banner);
+	mWindow.draw(Score);
 }
 
 #pragma endregion

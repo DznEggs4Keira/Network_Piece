@@ -1,6 +1,7 @@
 #pragma once
 //test game
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 class GameClass
 {
@@ -21,6 +22,8 @@ public:
 
 private:
 	void BallMovement(int state);
+	void AnimationHandler(int state);
+	void Sound();
 
 private:
 	//game objects
@@ -33,10 +36,22 @@ private:
 	sf::Sprite player;
 	sf::Texture playerTex;
 
+	sf::IntRect idleRect;
+	sf::IntRect runRect;
+	sf::IntRect attackRect;
+
+	//Sound
+	sf::Music BgMusic;
+	sf::SoundBuffer buffer;
+	sf::Sound hitFX;
 
 public:
 	//display text
 	sf::Font font;
 	sf::Text banner;
+
+	sf::Text Score;
+	std::string scoreNum = "Score: ";
+	int sNum = 0;
 };
 
