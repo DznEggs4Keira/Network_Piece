@@ -24,7 +24,7 @@ bool GameClass::Initialise()
 	redRect.setPosition(0.0f, 0.0f);
 
 	//Ball
-	ball.setRadius(30.0f);
+	ball.setRadius(ball_radius);
 	ball.setFillColor(sf::Color::Magenta);
 	ball.setOutlineThickness(5.0f);
 	ball.setOutlineColor(sf::Color::Color(245, 152, 66));
@@ -40,15 +40,15 @@ bool GameClass::Initialise()
 	banner.setPosition(sf::Vector2f(50.0f, 0.0f));
 	banner.setFillColor(sf::Color::Black);
 	banner.setStyle(sf::Text::Bold);
-	banner.setOutlineThickness(2.0f);
+	banner.setOutlineThickness(1.5f);
 	banner.setOutlineColor(sf::Color::White);
 
-	//Score boards
+	//Score board
 	Score.setFont(font);
-	Score.setPosition(sf::Vector2f(50.0f, 20.0f));
+	Score.setPosition(sf::Vector2f(50.0f, 25.0f));
 	Score.setFillColor(sf::Color::Black);
 	Score.setStyle(sf::Text::Bold);
-	Score.setOutlineThickness(2.0f);
+	Score.setOutlineThickness(1.5f);
 	Score.setOutlineColor(sf::Color::White);
 
 	Score.setString(scoreNum + std::to_string(sNum));
@@ -60,9 +60,9 @@ bool GameClass::Initialise()
 	}
 
 	//set up the tex rect of the first frame of each type of animation
-	idleRect = { 0, 0, 615, 564 };
-	runRect = { 0, 564, 615, 564 };
-	attackRect = { 0, 1128, 615, 564 };
+	idleRect = { 0, 0, 615, 564 }; //top row
+	runRect = { 0, 564, 615, 564 }; //mid row
+	attackRect = { 0, 1128, 615, 564 }; //bot row
 
 	player.setTexture(playerTex);
 	player.setTextureRect(idleRect);
@@ -105,19 +105,24 @@ void GameClass::SetPlayerPos(sf::Vector2f pr1) { player.setPosition(pr1); }
 sf::Vector2f GameClass::GetBallPos() { return ball.getPosition(); }
 void GameClass::SetBallPos(sf::Vector2f pr2) { ball.setPosition(pr2); }
 
+void GameClass::SetScoreString()
+{
+	//update the score (For Client)
+	Score.setString(scoreNum + std::to_string(GetScore()));
+}
+
 #pragma endregion
 
 #pragma region HandleInput
 
 void GameClass::HandleInput()
 {
-	int state = 0;
+	int pMove = 0;
 
 	//handle input of the player 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 	{
-		state = 1;
-		AnimationHandler(state);
+		pMove = 1;
 
 		//move player 
 		player.move(0.0f, -0.09f);
@@ -125,8 +130,7 @@ void GameClass::HandleInput()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
-		state = 2;
-		AnimationHandler(state);
+		pMove = 1;
 
 		//move player 
 		player.move(-0.09f, 0.0f);
@@ -134,8 +138,7 @@ void GameClass::HandleInput()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
-		state = 3;
-		AnimationHandler(state);
+		pMove = 1;
 
 		//move player 
 		player.move(0.0f, 0.09f);
@@ -143,8 +146,7 @@ void GameClass::HandleInput()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
-		state = 4;
-		AnimationHandler(state);
+		pMove = 1;
 
 		//move player 
 		player.move(0.09f, 0.0f);
@@ -155,17 +157,31 @@ void GameClass::HandleInput()
 	{
 		//run the attack animation
 		hitFX.play();
-		AnimationHandler(5);
 
-		BallMovement(state);
+		pMove = 2;
 
+		BallMovement(true);
 	}
+
+	AnimationHandler(pMove);
 }
 
-void GameClass::BallMovement(int state)
+void GameClass::BallMovement(bool pressed)
 {
 	//ball movement
 	float force = 0.5f;
+	sf::Clock clock;
+	float timer = clock.getElapsedTime().asSeconds();
+	bool scored = false;
+
+	/*
+	std::random_device seed_device;
+	std::default_random_engine engine(seed_device());
+	std::uniform_int_distribution<int> distribution(-16, 16);
+	auto random = std::bind(distribution, std::ref(engine));
+
+	sf::Vector2f direction(random(), random());
+	const float velocity = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
 	//ball will move only if collision
 	if (ball.getGlobalBounds().intersects(player.getGlobalBounds()))
@@ -195,9 +211,55 @@ void GameClass::BallMovement(int state)
 		}
 	}
 
+	elapsed += clock.restart();
+	while (elapsed >= update_ms) {
+		const auto pos = ball.getPosition();
+		const auto delta = update_ms.asSeconds() * velocity;
+		sf::Vector2f new_pos(pos.x + direction.x * delta, pos.y + direction.y * delta);
+
+		// bounce back when hits the blue rect
+		if (ball.getGlobalBounds().intersects(blueRect.getGlobalBounds()))
+		{
+			direction.x *= -1;
+			new_pos.x = window_width - ball_radius;
+
+			sNum += 1;
+		}
+
+		else if (new_pos.y - ball_radius < 0) { // top of window
+			direction.y *= -1;
+			new_pos.y = 0 + ball_radius;
+		}
+		else if (new_pos.y + ball_radius >= window_height) { // bottom of window
+			direction.y *= -1;
+			new_pos.y = window_height - ball_radius;
+		}
+
+		ball.setPosition(new_pos);
+
+		elapsed -= update_ms;
+	}
+	*/
+
+	//ball will move only if collision
+	if (ball.getGlobalBounds().intersects(player.getGlobalBounds()))
+	{
+		ball.move((force), 0.0f);
+	}
+
 	if (ball.getGlobalBounds().intersects(blueRect.getGlobalBounds()))
 	{
+		ball.move(-2, 0.0f);
+
+		scored = true;
+	}
+
+	if (scored)
+	{
 		sNum += 1;
+
+		//reset scored
+		scored = false;
 	}
 
 	//update the score
@@ -225,23 +287,8 @@ void GameClass::AnimationHandler(int state)
 			player.setTextureRect(idleRect);
 		}
 
-		//Attack
-		else if (state == 5)
-		{
-			if (attackRect.left == 9924)
-			{
-				attackRect.left = 0;
-			}
-			else
-			{
-				attackRect.left += 615;
-			}
-
-			player.setTextureRect(attackRect);
-		}
-
 		//Running
-		else
+		if (state == 1)
 		{
 			if (runRect.left == 9924)
 			{
@@ -253,6 +300,21 @@ void GameClass::AnimationHandler(int state)
 			}
 
 			player.setTextureRect(runRect);
+		}
+
+		//Attack
+		if (state == 2)
+		{
+			if (attackRect.left == 9924)
+			{
+				attackRect.left = 0;
+			}
+			else
+			{
+				attackRect.left += 615;
+			}
+
+			player.setTextureRect(attackRect);
 		}
 
 		timer.restart();

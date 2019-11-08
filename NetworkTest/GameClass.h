@@ -1,4 +1,10 @@
 #pragma once
+
+#include <random>
+#include <functional>
+#include <cstdlib>
+#include <cmath>
+
 //test game
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -20,9 +26,14 @@ public:
 	sf::Vector2f GetBallPos();
 	void SetBallPos(sf::Vector2f);
 
+	int GetScore() { return sNum; }
+	void SetScore(int s) { sNum = s; SetScoreString(); }
+
+	void SetScoreString();
+
 private:
-	void BallMovement(int state);
-	void AnimationHandler(int state);
+	void BallMovement(bool);
+	void AnimationHandler(int);
 	void Sound();
 
 private:
@@ -31,6 +42,13 @@ private:
 
 	//ball
 	sf::CircleShape ball;
+	//ball physics
+	float window_width = 640.0f;
+	float window_height = 480.0f;
+	float ball_radius = 30.0f;
+	sf::Clock clock;
+	sf::Time elapsed = clock.restart();
+	const sf::Time update_ms = sf::seconds(1.f / 30.f);
 
 	//player
 	sf::Sprite player;

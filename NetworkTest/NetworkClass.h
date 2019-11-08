@@ -30,6 +30,8 @@ public:
 
 	sf::Vector2f GetFP2(); void SetFP2(sf::Vector2f);
 
+	int GetSc1(); void SetSc1(int);
+
 	//check what connection, server or client
 	char GetConnection() { return connection; }
 	//Confirmation on connection String
@@ -71,6 +73,9 @@ private:
 
 	//final positions actually applied
 	sf::Vector2f fP1Position, fP2Position;
+
+	//score recieved from server
+	int sNum1, sNum2;
 
 	char connection, mode;
 	//recieve buffer
