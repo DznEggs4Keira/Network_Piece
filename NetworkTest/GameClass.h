@@ -31,9 +31,12 @@ public:
 
 	void SetScoreString();
 
+	void AnimationHandler();
+
 private:
+	int GetAnimState() { return pMove; }
+
 	void BallMovement(bool);
-	void AnimationHandler(int);
 	void Sound();
 
 private:
@@ -54,9 +57,11 @@ private:
 	sf::Sprite player;
 	sf::Texture playerTex;
 
+	sf::Clock timer;
 	sf::IntRect idleRect;
 	sf::IntRect runRect;
 	sf::IntRect attackRect;
+	int pMove = 0;
 
 	//Sound
 	sf::Music BgMusic;

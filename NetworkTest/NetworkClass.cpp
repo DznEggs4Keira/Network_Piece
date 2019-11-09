@@ -149,6 +149,7 @@ void NetworkClass::ServerSide(GameClass* pGame, bool bUpdate)
 	if (bUpdate)
 	{
 		pGame->HandleInput();
+		pGame->AnimationHandler();
 	}
 
 	//first the server will always recieve time stamp from client

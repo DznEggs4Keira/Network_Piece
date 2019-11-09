@@ -60,7 +60,7 @@ bool GameClass::Initialise()
 	}
 
 	//set up the tex rect of the first frame of each type of animation
-	idleRect = { 0, 0, 615, 564 }; //top row
+	idleRect = { 615, 0, 615, 564 }; //top row
 	runRect = { 0, 564, 615, 564 }; //mid row
 	attackRect = { 0, 1128, 615, 564 }; //bot row
 
@@ -69,8 +69,9 @@ bool GameClass::Initialise()
 
 	//player.setOrigin(sf::Vector2f(playerTex.getSize().x / 2, playerTex.getSize().y / 2)); --- Sprite dissapears
 	player.setScale(sf::Vector2f(0.5f, 0.5f));
-	player.setPosition(320.0f, 280.0f);
+	player.setPosition(300.0f, 250.0f);
 
+	//set up nd play music
 	Sound();
 
 	return true;
@@ -117,40 +118,32 @@ void GameClass::SetScoreString()
 
 void GameClass::HandleInput()
 {
-	int pMove = 0;
-
 	//handle input of the player 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 	{
-		pMove = 1;
-
 		//move player 
 		player.move(0.0f, -0.09f);
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
-		pMove = 1;
-
 		//move player 
 		player.move(-0.09f, 0.0f);
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
-		pMove = 1;
-
 		//move player 
 		player.move(0.0f, 0.09f);
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
-		pMove = 1;
-
 		//move player 
 		player.move(0.09f, 0.0f);
 	}
+
+	pMove = 1;
 
 	//Hit the ball
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -162,8 +155,6 @@ void GameClass::HandleInput()
 
 		BallMovement(true);
 	}
-
-	AnimationHandler(pMove);
 }
 
 void GameClass::BallMovement(bool pressed)
@@ -266,57 +257,60 @@ void GameClass::BallMovement(bool pressed)
 	Score.setString(scoreNum + std::to_string(sNum));
 }
 
-void GameClass::AnimationHandler(int state)
+void GameClass::AnimationHandler()
 {
-	sf::Clock timer;
-
-	if (timer.getElapsedTime().asSeconds() > 1.0f)
+	if (timer.getElapsedTime().asSeconds() > 0.05f)
 	{
-		//IDLE
-		if (state == 0)
+		switch (GetAnimState())
 		{
-			if (idleRect.left == 9924)
+			//Running
+			case 1:
 			{
-				idleRect.left = 0;
-			}
-			else
-			{
-				idleRect.left += 615;
+				if (runRect.left == 8609)
+				{
+					runRect.left = 0;
+				}
+				else
+				{
+					runRect.left += 615;
+				}
+
+				player.setTextureRect(runRect);
+				break;
 			}
 
-			player.setTextureRect(idleRect);
+			//Attack
+			case 2:
+			{
+				if (attackRect.left == 8609)
+				{
+					attackRect.left = 0;
+				}
+				else
+				{
+					attackRect.left += 615;
+				}
+
+				player.setTextureRect(attackRect);
+				break;
+			}
+
+			//IDLE
+			default:
+			{
+				if (idleRect.left == 8609)
+				{
+					idleRect.left = 0;
+				}
+				else
+				{
+					idleRect.left += 615;
+				}
+
+				player.setTextureRect(idleRect);
+				break;
+			}
 		}
-
-		//Running
-		if (state == 1)
-		{
-			if (runRect.left == 9924)
-			{
-				runRect.left = 0;
-			}
-			else
-			{
-				runRect.left += 615;
-			}
-
-			player.setTextureRect(runRect);
-		}
-
-		//Attack
-		if (state == 2)
-		{
-			if (attackRect.left == 9924)
-			{
-				attackRect.left = 0;
-			}
-			else
-			{
-				attackRect.left += 615;
-			}
-
-			player.setTextureRect(attackRect);
-		}
-
 		timer.restart();
 	}
 }
