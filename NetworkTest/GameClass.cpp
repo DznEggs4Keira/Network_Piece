@@ -1,6 +1,6 @@
 #include "GameClass.h"
 
-GameClass::GameClass()
+GameClass::GameClass() : engine(seed_device()), distribution(-3, 3)
 {
 }
 
@@ -60,21 +60,31 @@ bool GameClass::Initialise()
 	}
 
 	//set up the tex rect of the first frame of each type of animation
-	idleRect = { 615, 0, 615, 564 }; //top row
+	idleRect = { 0, 0, 615, 564 }; //top row
 	runRect = { 0, 564, 615, 564 }; //mid row
 	attackRect = { 0, 1128, 615, 564 }; //bot row
 
 	player.setTexture(playerTex);
 	player.setTextureRect(idleRect);
 
-	//player.setOrigin(sf::Vector2f(playerTex.getSize().x / 2, playerTex.getSize().y / 2)); --- Sprite dissapears
+	player.setOrigin(player.getTextureRect().width / 3, player.getTextureRect().height / 2);
 	player.setScale(sf::Vector2f(0.5f, 0.5f));
 	player.setPosition(300.0f, 250.0f);
+
+	//Initialize ball
+	InitBallMovement();
 
 	//set up nd play music
 	Sound();
 
 	return true;
+}
+
+void GameClass::InitBallMovement()
+{
+	auto random = std::bind(distribution, std::ref(engine));
+
+	direction = sf::Vector2f(random(), random());
 }
 
 void GameClass::Sound()
@@ -118,139 +128,106 @@ void GameClass::SetScoreString()
 
 void GameClass::HandleInput()
 {
+	SetAnimState(0);
+
 	//handle input of the player 1
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 	{
+		SetAnimState(1);
+
 		//move player 
-		player.move(0.0f, -0.09f);
+		player.move(0.0f, -5.f); //-0.09f
 	}
 
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
+		//flipped running
+		SetAnimState(3);
+
 		//move player 
-		player.move(-0.09f, 0.0f);
+		player.move(-5.f, 0.0f);
 	}
 
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
+		SetAnimState(1);
+
 		//move player 
-		player.move(0.0f, 0.09f);
+		player.move(0.0f, 5.f);
 	}
 
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
+		SetAnimState(1);
+
 		//move player 
-		player.move(0.09f, 0.0f);
+		player.move(5.f, 0.0f);
 	}
 
-	pMove = 1;
-
 	//Hit the ball
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+	else if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 	{
 		//run the attack animation
 		hitFX.play();
 
-		pMove = 2;
-
-		BallMovement(true);
+		SetAnimState(2);
 	}
 }
 
-void GameClass::BallMovement(bool pressed)
+void GameClass::BallMovement()
 {
 	//ball movement
-	float force = 0.5f;
-	sf::Clock clock;
-	float timer = clock.getElapsedTime().asSeconds();
+	float force = 3.0f;
 	bool scored = false;
 
-	/*
-	std::random_device seed_device;
-	std::default_random_engine engine(seed_device());
-	std::uniform_int_distribution<int> distribution(-16, 16);
-	auto random = std::bind(distribution, std::ref(engine));
-
-	sf::Vector2f direction(random(), random());
-	const float velocity = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+	const auto pos = ball.getPosition();
+	//const auto delta = GetDelta().asSeconds() * velocity;
+	sf::Vector2f new_pos(pos.x + direction.x, pos.y + direction.y);
 
 	//ball will move only if collision
 	if (ball.getGlobalBounds().intersects(player.getGlobalBounds()))
 	{
-		switch (state)
-		{
-			case 1:
-			{
-				ball.move(0.0f, -force);
-				break;
-			}
-			case 2:
-			{
-				ball.move(-force, 0.0f);
-				break;
-			}
-			case 3:
-			{
-				ball.move(0.0f, force);
-				break;
-			}
-			case 4:
-			{
-				ball.move(force, 0.0f);
-				break;
-			}
-		}
+		//ball.move((force), 0.0f);
+		direction.x *= force;
+		new_pos.x = window_width - 50 - ball_radius;
 	}
 
-	elapsed += clock.restart();
-	while (elapsed >= update_ms) {
-		const auto pos = ball.getPosition();
-		const auto delta = update_ms.asSeconds() * velocity;
-		sf::Vector2f new_pos(pos.x + direction.x * delta, pos.y + direction.y * delta);
-
-		// bounce back when hits the blue rect
-		if (ball.getGlobalBounds().intersects(blueRect.getGlobalBounds()))
-		{
-			direction.x *= -1;
-			new_pos.x = window_width - ball_radius;
-
-			sNum += 1;
-		}
-
-		else if (new_pos.y - ball_radius < 0) { // top of window
-			direction.y *= -1;
-			new_pos.y = 0 + ball_radius;
-		}
-		else if (new_pos.y + ball_radius >= window_height) { // bottom of window
-			direction.y *= -1;
-			new_pos.y = window_height - ball_radius;
-		}
-
-		ball.setPosition(new_pos);
-
-		elapsed -= update_ms;
-	}
-	*/
-
-	//ball will move only if collision
-	if (ball.getGlobalBounds().intersects(player.getGlobalBounds()))
+	if (new_pos.x + ball_radius >= (window_width - 50)) //blue rectangle
 	{
-		ball.move((force), 0.0f);
-	}
-
-	if (ball.getGlobalBounds().intersects(blueRect.getGlobalBounds()))
-	{
-		ball.move(-2, 0.0f);
+		direction.x *= -1;
+		new_pos.x = window_width - 50 - ball_radius;
 
 		scored = true;
 	}
 
+	else if (new_pos.x - ball_radius < (0 + 20)) // red rectangle
+	{
+		direction.x *= 0;
+		new_pos.x = 320;
+
+		scored = false;
+
+	}
+
+	else if (new_pos.y - ball_radius < 0) { // top of window
+		direction.y *= -1;
+		new_pos.y = 0 + ball_radius;
+
+		scored = false;
+	}
+
+	else if (new_pos.y + ball_radius >= window_height) { // bottom of window
+		direction.y *= -1;
+		new_pos.y = window_height - ball_radius;
+
+		scored = false;
+	}
+
+	ball.setPosition(new_pos);
+
 	if (scored)
 	{
 		sNum += 1;
-
-		//reset scored
-		scored = false;
 	}
 
 	//update the score
@@ -259,58 +236,79 @@ void GameClass::BallMovement(bool pressed)
 
 void GameClass::AnimationHandler()
 {
+	static bool temp = false;
+
 	if (timer.getElapsedTime().asSeconds() > 0.05f)
 	{
-		switch (GetAnimState())
+		//Running
+		if (GetAnimState() == 1)
 		{
-			//Running
-			case 1:
+			if (runRect.left == 8610)
 			{
-				if (runRect.left == 8609)
-				{
-					runRect.left = 0;
-				}
-				else
-				{
-					runRect.left += 615;
-				}
-
-				player.setTextureRect(runRect);
-				break;
+				runRect.left = 0;
 			}
-
-			//Attack
-			case 2:
+			else
 			{
-				if (attackRect.left == 8609)
-				{
-					attackRect.left = 0;
-				}
-				else
-				{
-					attackRect.left += 615;
-				}
-
-				player.setTextureRect(attackRect);
-				break;
+				runRect.left += 615;
 			}
-
-			//IDLE
-			default:
-			{
-				if (idleRect.left == 8609)
-				{
-					idleRect.left = 0;
-				}
-				else
-				{
-					idleRect.left += 615;
-				}
-
-				player.setTextureRect(idleRect);
-				break;
-			}
+			player.setTextureRect(runRect);
+			
+			player.setScale(sf::Vector2f(0.5f, 0.5f));
+			temp = false;
 		}
+
+		//Flipped Running
+		if (GetAnimState() == 3)
+		{
+			if (runRect.left == 8610)
+			{
+				runRect.left = 0;
+			}
+			else
+			{
+				runRect.left += 615;
+			}
+			player.setTextureRect(runRect);
+			
+			player.setScale(sf::Vector2f(-0.5f, 0.5f));
+			temp = true;
+		}
+
+		//Attack
+		if (GetAnimState() == 2)
+		{
+			if (attackRect.left == 8610)
+			{
+				attackRect.left = 0;
+			}
+			else
+			{
+				attackRect.left += 615;
+			}
+
+			player.setTextureRect(attackRect);
+			player.setScale(sf::Vector2f(0.5f, 0.5f));
+		}
+
+		//IDLE
+		if (GetAnimState() == 0)
+		{
+			if (idleRect.left == 8610)
+			{
+				idleRect.left = 0;
+			}
+			else
+			{
+				idleRect.left += 615;
+			}
+
+			player.setTextureRect(idleRect);
+			if (temp)
+				player.setScale(sf::Vector2f(-0.5f, 0.5f));
+			else
+				player.setScale(sf::Vector2f(0.5f, 0.5f));
+		}
+
 		timer.restart();
 	}
 }

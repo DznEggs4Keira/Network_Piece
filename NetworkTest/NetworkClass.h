@@ -30,15 +30,13 @@ public:
 
 	sf::Vector2f GetFP2(); void SetFP2(sf::Vector2f);
 
-	int GetSc1(); void SetSc1(int);
-
 	//check what connection, server or client
 	char GetConnection() { return connection; }
 	//Confirmation on connection String
 	void ConfirmConnect();
 
 	//Server Side
-	void ServerSide(GameClass* pGame, bool bUpdate);
+	void ServerSide(GameClass* pGame, bool bUpdate, sf::Time tUpdate);
 
 	//Client Side
 	void ClientSide(GameClass* pGame);
@@ -58,7 +56,7 @@ private:
 	//Send Time Pack
 	void Step1TimeSync();
 	//Recieve Time Pack
-	void Step3TimeSync(GameClass* pGame);
+	void Step3TimeSync();
 	void RecievePosition(GameClass* pGame);
 
 	//Calc
@@ -75,7 +73,10 @@ private:
 	sf::Vector2f fP1Position, fP2Position;
 
 	//score recieved from server
-	int sNum1, sNum2;
+	int sNum;
+
+	//player animation state
+	int sMove;
 
 	char connection, mode;
 	//recieve buffer

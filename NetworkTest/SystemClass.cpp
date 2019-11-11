@@ -38,7 +38,7 @@ void SystemClass::Initialise()
 	}
 
 	//Init Game
-	pGame = new GameClass;
+	pGame = new GameClass();
 	
 	result = pGame->Initialise();
 	if (!result)
@@ -65,6 +65,9 @@ void SystemClass::Run()
 
 	/*this is the main game while loop.... here it will check based on connection
 	and run the appropriate bit of the loop for for the server or client*/
+	sf::Clock clock;
+	sf::Time elapsed = clock.restart();
+	const sf::Time update_ms = sf::seconds(1.f / 120.f);
 
 	//handle game window
 	while (mWindow.isOpen())
@@ -85,7 +88,13 @@ void SystemClass::Run()
 					update = false;
 			}
 
-			pNetwork->ServerSide(pGame, update);
+			elapsed += clock.restart();
+			while (elapsed >= update_ms)
+			{
+				pNetwork->ServerSide(pGame, update, update_ms);
+
+				elapsed -= update_ms;
+			}
 		}
 
 			//if client
@@ -99,7 +108,13 @@ void SystemClass::Run()
 					mWindow.close();
 			}
 
-			pNetwork->ClientSide(pGame);
+			elapsed += clock.restart();
+			while (elapsed >= update_ms)
+			{
+				pNetwork->ClientSide(pGame);
+
+				elapsed -= update_ms;
+			}
 		}
 
 		//Finally draw elements of window and then display
@@ -111,5 +126,5 @@ void SystemClass::Run()
 	}
 
 	//pause the application on exit from window
-	system("pause");
+	//system("pause");
 }

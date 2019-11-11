@@ -4,6 +4,7 @@
 #include <functional>
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
 
 //test game
 #include <SFML/Graphics.hpp>
@@ -28,15 +29,22 @@ public:
 
 	int GetScore() { return sNum; }
 	void SetScore(int s) { sNum = s; SetScoreString(); }
+	
+	int GetAnimState() { std::cout << "pMove: " << pMove << std::endl; return pMove; }
+	void SetAnimState(int pM) { pMove = pM; }
+
+	void SetDelta(sf::Time tUpdate) { tDelta = tUpdate; }
+	sf::Time GetDelta() { return tDelta; }
 
 	void SetScoreString();
 
 	void AnimationHandler();
 
-private:
-	int GetAnimState() { return pMove; }
+	void BallMovement();
 
-	void BallMovement(bool);
+private:
+
+	void InitBallMovement();
 	void Sound();
 
 private:
@@ -49,9 +57,13 @@ private:
 	float window_width = 640.0f;
 	float window_height = 480.0f;
 	float ball_radius = 30.0f;
-	sf::Clock clock;
-	sf::Time elapsed = clock.restart();
-	const sf::Time update_ms = sf::seconds(1.f / 30.f);
+
+	std::random_device seed_device;
+	std::default_random_engine engine;
+	std::uniform_int_distribution<int> distribution;
+	sf::Vector2f direction;
+	const float velocity = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+	sf::Time tDelta;
 
 	//player
 	sf::Sprite player;

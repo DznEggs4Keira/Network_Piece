@@ -97,9 +97,6 @@ void NetworkClass::SetFP1(sf::Vector2f fp1) { fP1Position = fp1; }
 sf::Vector2f NetworkClass::GetFP2() { return fP2Position; }
 void NetworkClass::SetFP2(sf::Vector2f fp2) { fP2Position = fp2; }
 
-int NetworkClass::GetSc1() { return sNum1; }
-void NetworkClass::SetSc1(int Sc) { sNum1 = Sc; }
-
 void NetworkClass::ConfirmConnect()
 {
 	//Sends Confirmation --- move to server and client
@@ -135,7 +132,7 @@ void NetworkClass::SetString(GameClass* pGame)
 
 #pragma region Server
 
-void NetworkClass::ServerSide(GameClass* pGame, bool bUpdate)
+void NetworkClass::ServerSide(GameClass* pGame, bool bUpdate, sf::Time tUpdate)
 {
 	//Display Server Time
 	SetString(pGame);
@@ -143,13 +140,14 @@ void NetworkClass::ServerSide(GameClass* pGame, bool bUpdate)
 	//save the position vectors and Score into the vectors to send
 	SetP1(pGame->GetPlayerPos());
 	SetP2(pGame->GetBallPos());
-	SetSc1(pGame->GetScore());
+
 
 	//handle input and collision for player 1 and 2
 	if (bUpdate)
 	{
 		pGame->HandleInput();
 		pGame->AnimationHandler();
+		pGame->BallMovement();
 	}
 
 	//first the server will always recieve time stamp from client
@@ -201,11 +199,11 @@ void NetworkClass::SendPosition(GameClass* pGame)
 	updatePosSent = posSentTime.getElapsedTime().asMilliseconds();
 	if (updatePosSent >= 20)
 	{
-		if ((p1Position != pGame->GetPlayerPos()) || (p2Position != pGame->GetBallPos()) || sNum1 != pGame->GetScore())
+		if ((p1Position != pGame->GetPlayerPos()) || (p2Position != pGame->GetBallPos()) || sNum != pGame->GetScore() || sMove != pGame->GetAnimState())
 		{
 			//position identifier << latest serverTime << position information
 			testPacket << PosPack << serverTime << pGame->GetPlayerPos().x << pGame->GetPlayerPos().y
-				<< pGame->GetBallPos().x << pGame->GetBallPos().y << pGame->GetScore();
+				<< pGame->GetBallPos().x << pGame->GetBallPos().y << pGame->GetScore() << pGame->GetAnimState();
 
 			sf::Socket::Status status = testSocket.send(testPacket);
 			if (status == sf::Socket::Done)
@@ -227,6 +225,8 @@ void NetworkClass::ClientSide(GameClass* pGame)
 {
 	SetString(pGame);
 
+	pGame->AnimationHandler();
+
 	//this is where the time sync starts.
 	//client will send a packet storing the identifier type and its client time
 	//STEP 1 - time sync
@@ -245,7 +245,7 @@ void NetworkClass::ClientSide(GameClass* pGame)
 			if (check == 1)
 			{
 				//STEP 3 - time sync
-				Step3TimeSync(pGame);
+				Step3TimeSync();
 			}
 
 			//second check is position
@@ -275,7 +275,7 @@ void NetworkClass::Step1TimeSync()
 	}
 }
 
-void NetworkClass::Step3TimeSync(GameClass* pGame)
+void NetworkClass::Step3TimeSync()
 {
 	//identifier is opened so first was server time and second was old client time
 	if (testPacket >> tempServerTime >> oldClientTime)
@@ -310,7 +310,7 @@ void NetworkClass::Step3TimeSync(GameClass* pGame)
 void NetworkClass::RecievePosition(GameClass* pGame)
 {
 	if (testPacket >> tempServerTime >> nP1Position.x >> nP1Position.y >>
-		nP2Position.x >> nP2Position.y >> sNum2)
+		nP2Position.x >> nP2Position.y >> sNum >> sMove)
 	{
 		//enter time into vector
 		sTimeP1.push_back(tempServerTime);
@@ -362,7 +362,8 @@ void NetworkClass::RecievePosition(GameClass* pGame)
 			//place float value in here --- move makes it dissappear.
 			pGame->SetPlayerPos(GetFP1());
 			pGame->SetBallPos(GetFP2());
-			pGame->SetScore(sNum2);
+			pGame->SetScore(sNum);
+			pGame->SetAnimState(sMove);
 		}
 	}
 }
