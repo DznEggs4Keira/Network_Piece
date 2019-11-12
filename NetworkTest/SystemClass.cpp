@@ -55,8 +55,8 @@ void SystemClass::Run()
 	//Sends Confirmation --- move to server and client
 	pNetwork->ConfirmConnect();
 
-	//renders the window
 	sf::RenderWindow mWindow(sf::VideoMode(640, 480, 32), "Network Piece");
+
 	//Prepare the socket to recieve the packets
 	pNetwork->testSocket.setBlocking(false);
 

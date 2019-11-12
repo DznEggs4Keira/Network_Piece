@@ -45,6 +45,7 @@ public:
 private:
 
 	void InitBallMovement();
+
 	void Sound();
 
 private:
@@ -86,7 +87,7 @@ public:
 	sf::Text banner;
 
 	sf::Text Score;
-	std::string scoreNum = "Score: ";
+	std::string scoreNum = "Hit by Ball: ";
 	int sNum = 0;
 };
 

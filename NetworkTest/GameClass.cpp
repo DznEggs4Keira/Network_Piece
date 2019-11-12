@@ -1,6 +1,6 @@
 #include "GameClass.h"
 
-GameClass::GameClass() : engine(seed_device()), distribution(-3, 3)
+GameClass::GameClass() : engine(seed_device()), distribution(-6, 6)
 {
 }
 
@@ -178,18 +178,17 @@ void GameClass::BallMovement()
 {
 	//ball movement
 	float force = 3.0f;
-	bool scored = false;
+	bool hit = false;
 
 	const auto pos = ball.getPosition();
-	//const auto delta = GetDelta().asSeconds() * velocity;
 	sf::Vector2f new_pos(pos.x + direction.x, pos.y + direction.y);
 
 	//ball will move only if collision
 	if (ball.getGlobalBounds().intersects(player.getGlobalBounds()))
 	{
 		//ball.move((force), 0.0f);
-		direction.x *= force;
-		new_pos.x = window_width - 50 - ball_radius;
+
+		hit = true;
 	}
 
 	if (new_pos.x + ball_radius >= (window_width - 50)) //blue rectangle
@@ -197,15 +196,15 @@ void GameClass::BallMovement()
 		direction.x *= -1;
 		new_pos.x = window_width - 50 - ball_radius;
 
-		scored = true;
+		hit = false;
 	}
 
 	else if (new_pos.x - ball_radius < (0 + 20)) // red rectangle
 	{
-		direction.x *= 0;
-		new_pos.x = 320;
+		direction.x *= -1;
+		new_pos.x = 0 + 50 + ball_radius;
 
-		scored = false;
+		hit = false;
 
 	}
 
@@ -213,19 +212,19 @@ void GameClass::BallMovement()
 		direction.y *= -1;
 		new_pos.y = 0 + ball_radius;
 
-		scored = false;
+		hit = false;
 	}
 
 	else if (new_pos.y + ball_radius >= window_height) { // bottom of window
 		direction.y *= -1;
 		new_pos.y = window_height - ball_radius;
 
-		scored = false;
+		hit = false;
 	}
 
 	ball.setPosition(new_pos);
 
-	if (scored)
+	if (hit)
 	{
 		sNum += 1;
 	}

@@ -4,13 +4,13 @@
 
 int main()
 {
-	std::cout << "welcome" << std::endl;
+	std::cout << "Welcome!" << std::endl;
 
-	//Network test;
-	//test.run();
+	/*Network test;
+	//test.run();*/
 
 	//Init
-	SystemClass* sys = new SystemClass;
+	SystemClass* sys = new SystemClass();
 
 	//Run
 	sys->Run();
@@ -21,6 +21,9 @@ int main()
 
 	return 0;
 }
+
+
+
 
 /*
 // emacs: -*- Mode: c++; c-file-style: "stroustrup"; c-basic-offset: 4; indent-tabs-mode: nil; -*-
